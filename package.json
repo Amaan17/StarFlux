@@ -1,0 +1,65 @@
+{
+  "name": "starflux",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/main/main.js",
+  "scripts": {
+    "dev": "concurrently -k \"npm:watch:main\" \"npm:watch:preload\" \"npm:dev:renderer\" \"npm:start:electron\"",
+    "watch:main": "esbuild electron/main.ts --bundle --platform=node --external:electron --outdir=dist/main --format=cjs --sourcemap --watch",
+    "watch:preload": "esbuild electron/preload.ts --bundle --platform=node --external:electron --outdir=dist/preload --format=cjs --sourcemap --watch",
+    "dev:renderer": "vite",
+    "start:electron": "cross-env VITE_DEV_SERVER_URL=http://localhost:5173 wait-on http://localhost:5173 file:dist/main/main.js file:dist/preload/preload.js && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .",
+    "build:main": "esbuild electron/main.ts --bundle --platform=node --external:electron --outdir=dist/main --format=cjs --minify",
+    "build:preload": "esbuild electron/preload.ts --bundle --platform=node --external:electron --outdir=dist/preload --format=cjs --minify",
+    "build:renderer": "vite build",
+    "build": "rimraf dist && npm run build:main && npm run build:preload && npm run build:renderer",
+    "start:prod": "electron .",
+    "dist:win": "npm run build && electron-builder -w",
+    "pack:win": "npm run build && electron-builder -w --dir"
+  },
+  "build": {
+    "appId": "com.starflux.app",
+    "productName": "StarFlux",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] }
+      ],
+      "artifactName": "StarFlux-${version}-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.2",
+    "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^31.2.1",
+    "electron-builder": "^26.0.12",
+    "esbuild": "^0.20.2",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.4.0",
+    "vite": "^5.4.0",
+    "wait-on": "^7.2.0"
+  },
+  "dependencies": {
+    "@tiptap/extension-link": "^2.6.6",
+    "@tiptap/extension-placeholder": "^2.6.6",
+    "@tiptap/extension-underline": "^2.6.6",
+    "@tiptap/react": "^2.6.6",
+    "@tiptap/starter-kit": "^2.6.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
